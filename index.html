@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Молитовник</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:              #f2ece0;
+      --surface:         #faf7f2;
+      --border:          #d5c9b5;
+      --text:            #2a1f14;
+      --text-dim:        #7a6a55;
+      --text-muted:      #a89880;
+      --accent:          #6b5240;
+      --accent-soft:     #8a6e58;
+      --btn-sec:         #ede5d5;
+      --btn-sec-hover:   #e2d5c2;
+      --modal-overlay:   rgba(42, 31, 20, 0.45);
+    }
+
+    html { height: 100%; }
+
+    body {
+      min-height: 100%;
+      font-family: Georgia, 'Times New Roman', serif;
+      background-color: var(--bg);
+      background-image:
+        radial-gradient(ellipse at 15% 40%, rgba(180,140,90,0.07) 0%, transparent 55%),
+        radial-gradient(ellipse at 85% 70%, rgba(120,80,40,0.05) 0%, transparent 55%);
+      color: var(--text);
+    }
+
+    /* ── SCREENS ─────────────────────────────────────────────────── */
+    .screen { display: none; min-height: 100vh; flex-direction: column; }
+    .screen.active { display: flex; }
+
+    /* ── MENU ────────────────────────────────────────────────────── */
+    #screen-menu {
+      align-items: center;
+      padding: 56px 24px 40px;
+    }
+
+    .menu-ornament {
+      font-size: 44px;
+      color: var(--accent);
+      line-height: 1;
+      margin-bottom: 14px;
+      letter-spacing: -2px;
+    }
+
+    .menu-title {
+      font-size: 13px;
+      font-family: system-ui, sans-serif;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 48px;
+    }
+
+    .rosary-list {
+      width: 100%;
+      max-width: 420px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .rosary-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 20px;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      text-align: left;
+      width: 100%;
+    }
+
+    .rosary-card:hover:not(.disabled) {
+      border-color: var(--accent-soft);
+      background: #f5efe4;
+    }
+
+    .rosary-card.disabled {
+      opacity: 0.42;
+      cursor: default;
+    }
+
+    .rosary-card-name {
+      font-size: 17px;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .rosary-card-sub {
+      font-size: 13px;
+      font-family: system-ui, sans-serif;
+      color: var(--text-dim);
+    }
+
+    .badge {
+      display: inline-block;
+      margin-top: 8px;
+      font-size: 10px;
+      font-family: system-ui, sans-serif;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 2px 7px;
+    }
+
+    /* ── MYSTERY SELECT ──────────────────────────────────────────── */
+    #screen-mystery { min-height: 100vh; }
+
+    .sub-header {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .icon-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--accent);
+      font-size: 22px;
+      padding: 2px 6px;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .sub-header-title {
+      font-size: 14px;
+      font-family: system-ui, sans-serif;
+      color: var(--text-dim);
+    }
+
+    .mystery-list {
+      padding: 20px 16px 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-width: 480px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .mystery-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 18px 20px;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+
+    .mystery-card:hover {
+      border-color: var(--accent-soft);
+      background: #f5efe4;
+    }
+
+    .mystery-card-title {
+      font-size: 18px;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .mystery-card-days {
+      font-size: 13px;
+      font-family: system-ui, sans-serif;
+      color: var(--text-muted);
+    }
+
+    /* ── PRAYER SCREEN ───────────────────────────────────────────── */
+    #screen-prayer { min-height: 100vh; }
+
+    .prayer-topbar {
+      padding: 11px 14px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .topbar-home {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--accent);
+      font-size: 22px;
+      padding: 2px 6px;
+      line-height: 1;
+    }
+
+    .topbar-label {
+      font-size: 13px;
+      font-family: system-ui, sans-serif;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    .topbar-spacer { width: 40px; }
+
+    /* ── COUNTERS ────────────────────────────────────────────────── */
+    .counters {
+      padding: 8px 14px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      flex-shrink: 0;
+    }
+
+    .chip {
+      font-size: 12px;
+      font-family: system-ui, sans-serif;
+      color: var(--text-muted);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 3px 11px;
+      transition: opacity 0.15s;
+    }
+
+    .chip.hidden { display: none; }
+
+    /* ── PRAYER CONTENT ──────────────────────────────────────────── */
+    .prayer-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 28px 20px 20px;
+      max-width: 620px;
+      margin: 0 auto;
+      width: 100%;
+      transition: opacity 0.1s ease;
+    }
+
+    .prayer-content.fading { opacity: 0.12; }
+
+    .content-label {
+      font-size: 11px;
+      font-family: system-ui, sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+
+    .content-title {
+      font-size: 23px;
+      color: var(--text);
+      margin-bottom: 5px;
+    }
+
+    .content-subtitle {
+      font-size: 15px;
+      font-family: system-ui, sans-serif;
+      color: var(--text-dim);
+      font-style: italic;
+      margin-bottom: 6px;
+    }
+
+    .mystery-ctx {
+      font-size: 12px;
+      font-family: system-ui, sans-serif;
+      color: var(--text-muted);
+      margin-bottom: 18px;
+    }
+
+    hr.divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 18px 0;
+    }
+
+    .prayer-text {
+      font-size: 18px;
+      line-height: 1.8;
+      color: var(--text);
+    }
+
+    .mystery-reflection {
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--text-dim);
+      font-family: system-ui, sans-serif;
+    }
+
+    .mystery-fruit {
+      margin-top: 16px;
+      padding: 10px 14px;
+      border-left: 2px solid var(--border);
+      font-size: 13px;
+      font-family: system-ui, sans-serif;
+      color: var(--text-muted);
+      font-style: italic;
+    }
+
+    /* ── END SCREEN ──────────────────────────────────────────────── */
+    .end-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 72px 24px 48px;
+      text-align: center;
+    }
+
+    .end-cross {
+      font-size: 52px;
+      color: var(--accent);
+      margin-bottom: 20px;
+    }
+
+    .end-title {
+      font-size: 26px;
+      color: var(--text);
+      margin-bottom: 10px;
+    }
+
+    .end-sub {
+      font-size: 15px;
+      font-family: system-ui, sans-serif;
+      color: var(--text-dim);
+      margin-bottom: 44px;
+    }
+
+    .end-btn {
+      padding: 13px 32px;
+      background: var(--btn-sec);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 16px;
+      font-family: system-ui, sans-serif;
+      color: var(--text);
+      cursor: pointer;
+      transition: background 0.12s;
+    }
+
+    .end-btn:hover { background: var(--btn-sec-hover); }
+
+    /* ── NAV ─────────────────────────────────────────────────────── */
+    .prayer-nav {
+      padding: 14px 16px;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+      display: flex;
+      gap: 10px;
+      flex-shrink: 0;
+    }
+
+    .nav-btn {
+      flex: 1;
+      padding: 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--btn-sec);
+      color: var(--text);
+      font-size: 16px;
+      font-family: system-ui, sans-serif;
+      cursor: pointer;
+      transition: background 0.12s, transform 0.08s, filter 0.08s;
+    }
+
+    .nav-btn:hover:not(:disabled) { background: var(--btn-sec-hover); }
+
+    .nav-btn.pressed          { transform: scale(0.96); filter: brightness(0.84); }
+    .nav-btn.primary.pressed  { filter: brightness(0.78); }
+
+    .nav-btn.primary {
+      background: var(--accent);
+      color: #faf7f2;
+      border-color: var(--accent);
+    }
+
+    .nav-btn.primary:hover:not(:disabled) { background: var(--accent-soft); }
+
+    .nav-btn:disabled { opacity: 0.3; cursor: default; }
+
+    /* ── MODAL ───────────────────────────────────────────────────── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: var(--modal-overlay);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 28px 24px 20px;
+      max-width: 340px;
+      width: 100%;
+    }
+
+    .modal-text {
+      font-size: 16px;
+      line-height: 1.55;
+      color: var(--text);
+      margin-bottom: 24px;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .modal-btn {
+      flex: 1;
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      background: var(--btn-sec);
+      color: var(--text);
+      font-size: 15px;
+      font-family: system-ui, sans-serif;
+      cursor: pointer;
+      transition: background 0.12s;
+    }
+
+    .modal-btn:hover { background: var(--btn-sec-hover); }
+
+    .modal-btn.confirm {
+      background: var(--accent);
+      color: #faf7f2;
+      border-color: var(--accent);
+    }
+
+    .modal-btn.confirm:hover { background: var(--accent-soft); }
+
+    /* ── RESPONSIVE ──────────────────────────────────────────────── */
+    @media (min-width: 640px) {
+      .prayer-content { padding: 36px 32px 24px; }
+      .prayer-text { font-size: 19px; }
+      .content-title { font-size: 25px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══ MENU ══════════════════════════════════════════════════════ -->
+<div id="screen-menu" class="screen active">
+  <div class="menu-ornament">✝</div>
+  <div class="menu-title">Молитовник</div>
+  <div class="rosary-list">
+
+    <button class="rosary-card" onclick="openRosary()">
+      <div class="rosary-card-name">Вінець Пресвятої Богородиці</div>
+      <div class="rosary-card-sub">Чотири набори тайн з роздумами</div>
+    </button>
+
+    <div class="rosary-card disabled">
+      <div class="rosary-card-name">Вінець Божого Милосердя</div>
+      <div class="rosary-card-sub">П'ять десятків з тайнами</div>
+      <div class="badge">Незабаром</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══ MYSTERY SELECT ════════════════════════════════════════════ -->
+<div id="screen-mystery" class="screen">
+  <div class="sub-header">
+    <button class="icon-btn" onclick="show('menu')" aria-label="Назад">←</button>
+    <div class="sub-header-title">Вінець Пресвятої Богородиці</div>
+  </div>
+  <div class="mystery-list">
+
+    <div class="mystery-card" onclick="start('joyful')">
+      <div class="mystery-card-title">Радісні тайни</div>
+      <div class="mystery-card-days">Понеділок, Вівторок</div>
+    </div>
+
+    <div class="mystery-card" onclick="start('sorrowful')">
+      <div class="mystery-card-title">Страсні тайни</div>
+      <div class="mystery-card-days">Середа, П'ятниця</div>
+    </div>
+
+    <div class="mystery-card" onclick="start('glorious')">
+      <div class="mystery-card-title">Славні тайни</div>
+      <div class="mystery-card-days">Субота, Неділя</div>
+    </div>
+
+    <div class="mystery-card" onclick="start('luminous')">
+      <div class="mystery-card-title">Світлі тайни</div>
+      <div class="mystery-card-days">Четвер</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══ PRAYER ════════════════════════════════════════════════════ -->
+<div id="screen-prayer" class="screen">
+
+  <div class="prayer-topbar">
+    <button class="topbar-home" onclick="askHome()" aria-label="На головну">✝</button>
+    <div class="topbar-label" id="topbar-label"></div>
+    <div class="topbar-spacer"></div>
+  </div>
+
+  <div class="counters">
+    <div class="chip" id="chip-mary">Богородице: 1 / 10</div>
+    <div class="chip" id="chip-decade">Десяток: 1 / 5</div>
+    <div class="chip" id="chip-step">Крок: 1 / 81</div>
+  </div>
+
+  <div class="prayer-content" id="prayer-content"></div>
+
+  <div class="prayer-nav" id="prayer-nav">
+    <button class="nav-btn" id="btn-prev" onclick="go(-1, this)">← Назад</button>
+    <button class="nav-btn primary" id="btn-next" onclick="go(1, this)">Далі →</button>
+  </div>
+
+</div>
+
+<!-- ═══ HOME MODAL ════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modal-home">
+  <div class="modal-box">
+    <div class="modal-text">Повернутися на головну?<br>Прогрес буде втрачено.</div>
+    <div class="modal-actions">
+      <button class="modal-btn" onclick="closeModal()">Скасувати</button>
+      <button class="modal-btn confirm" onclick="goHome()">Так, повернутися</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── PRAYERS ──────────────────────────────────────────────────────
+const CROSS =
+  'В ім’я Отця, і Сина, і Святого Духа. Амінь.';
+
+const SLAVA_TOBI =
+  'Слава Тобі, Боже наш, слава Тобі!';
+
+const TSARIU =
+  'Царю небесний, утішителю, Душе істини, що всюди єси і все наповняєш, ' +
+  'скарбнице благ і життя подателю, прийди і вселися в нас, ' +
+  'і очисти нас від усякої скверни, і спаси, благий, душі наші.';
+
+const CREED =
+  'Вірую в єдиного Бога Отця, Вседержителя, Творця неба і землі, ' +
+  'і всього видимого і невидимого. ' +
+  'І в єдиного Господа Ісуса Христа, Сина Божого, Єдинородного, ' +
+  'від Отця рожденного перед усіма віками — ' +
+  'світло від світла, Бога істинного від Бога істинного, ' +
+  'рожденного, несотворенного, єдиносущного з Отцем, що через Нього все постало. ' +
+  'Він задля нас, людей, і нашого ради спасення зійшов із небес, ' +
+  'і воплотився з Духа Святого і Марії Діви, і став людиною. ' +
+  "І був розп’ятий за нас за Понтія Пилата, і страждав, і був похований, " +
+  'і воскрес у третій день, згідно з Писанням. ' +
+  'І вознісся на небо, і сидить праворуч Отця. ' +
+  'І вдруге прийде зо славою судити живих і мертвих, а Його Царству не буде кінця. ' +
+  'І в Духа Святого, Господа животворящого, що від Отця ізходить, ' +
+  'що з Отцем і Сином рівнопокланяємий, рівнославимий, що говорив через пророків. ' +
+  'В єдину, святу, соборну й апостольську Церкву. ' +
+  'Ісповідую одне хрещення на відпущення гріхів. ' +
+  'Очікую воскресення мертвих і життя будочого віку. Амінь.';
+
+const OUR_FATHER =
+  "Отче наш, що єси на небесах, нехай святиться ім’я Твоє; " +
+  'нехай прийде Царство Твоє; нехай буде воля Твоя, як на небі, так і на землі. ' +
+  'Хліб наш насущний дай нам сьогодні; і прости нам провини наші, ' +
+  'як і ми прощаємо винуватцям нашим; ' +
+  'і не введи нас у спокусу, але визволи нас від лукавого.';
+
+const HAIL_MARY =
+  'Богородице Діво, радуйся, Благодатна Маріє, Господь з Тобою. ' +
+  'Благословенна Ти між жінками, і благословенний плід лона Твого, ' +
+  'бо Ти породила Христа Спаса, Ізбавителя душ наших.';
+
+const GLORY_FATHER =
+  'Слава Отцю, що нас сотворив, нині і повсякчас, і на віки віків. Амінь.';
+
+const GLORY_SON =
+  'Слава Сину, що нас відкупив, і нині, і повсякчас, і на віки віків. Амінь.';
+
+const GLORY_SPIRIT =
+  'Слава Святому Духові, що нас просвітив, і в святій вірі утвердив, ' +
+  'нині і повсякчас, і на віки вічні. Амінь.';
+
+const GLORY_BE =
+  'Слава Отцю, і Сину, і Святому Духові, ' +
+  'і нині і повсякчас, і на віки віків. Амінь.';
+
+const FORGIVENESS =
+  'О, наш любий Ісусе, прости нам наші гріхи, ' +
+  'захорони нас від пекельного вогню, заведи до неба усі душі, ' +
+  'особливо ті, що найбільше потребують Твого Милосердя.';
+
+const DOSTOYNO =
+  'Достойно є воістину величати блаженною Тебе, Богородицю, ' +
+  'присноблаженну, і пренепорочну, і Матір Бога нашого. ' +
+  'Чеснішу від херувимів і незрівнянно славнішу від серафимів, ' +
+  'що без зотління Бога Слово породила, сущу Богородицю, тебе величаємо. Амінь.';
+
+// ─── MYSTERIES ────────────────────────────────────────────────────
+const SETS = {
+  joyful: {
+    label: 'Радісні тайни',
+    days: 'Понеділок, Вівторок',
+    mysteries: [
+      {
+        ordinal: 'Перша тайна',
+        name: 'Благовіщення Пресвятої Богородиці',
+        reflection: 'Архангел Гавриїл благовістить Пресвятій Діві Марії, що вона стане Матір’ю Сина Божого. Марія покірно відповідає: «Ось я Господня служниця, нехай мені станеться за словом твоїм».',
+        fruit: 'Плід тайни: покора',
+      },
+      {
+        ordinal: 'Друга тайна',
+        name: 'Відвідини Пресвятої Богородиці до святої Єлизавети',
+        reflection: 'Пресвята Богородиця поспішає відвідати свою родичку Єлизавету. Дитина у лоні Єлизавети підстрибнула від радості, а Єлизавета, сповнена Духа Святого, вигукує: «Благословенна ти між жінками!»',
+        fruit: 'Плід тайни: любов до ближнього',
+      },
+      {
+        ordinal: 'Третя тайна',
+        name: 'Різдво Господа нашого Ісуса Христа',
+        reflection: 'Ісус Христос народжується у Вифлеємі в убогих яслах. Ангели славлять Бога на висоті, а пастирі приходять поклонитися Немовляті.',
+        fruit: 'Плід тайни: бідність духу і відречення від світу',
+      },
+      {
+        ordinal: 'Четверта тайна',
+        name: 'Стрітення Господа нашого Ісуса Христа',
+        reflection: 'Пресвята Богородиця і Йосип приносять немовля Ісуса до Єрусалимського храму. Праведний Симеон бере Дитину на руки і пророкує про Неї.',
+        fruit: 'Плід тайни: послух і чистота',
+      },
+      {
+        ordinal: 'П’ята тайна',
+        name: 'Знаходження Отрока Ісуса в Єрусалимському храмі',
+        reflection: 'Дванадцятилітній Ісус залишається в Єрусалимі. Через три дні батьки знаходять Його в храмі серед учителів, де Він слухає їх і ставить запитання.',
+        fruit: 'Плід тайни: побожність',
+      },
+    ],
+  },
+
+  sorrowful: {
+    label: 'Страсні тайни',
+    days: "Середа, П'ятниця",
+    mysteries: [
+      {
+        ordinal: 'Перша тайна',
+        name: 'Молитва Ісуса в Гетсиманському саду',
+        reflection: 'Ісус молиться в саду Гетсиманії і в смертельній тузі потіє кров’ю. Він приймає волю Отця: «Не моя воля, а Твоя нехай станеться».',
+        fruit: 'Плід тайни: жаль за гріхи',
+      },
+      {
+        ordinal: 'Друга тайна',
+        name: 'Бичування Господа нашого Ісуса Христа',
+        reflection: 'За наказом Пилата Ісуса прив’язують до стовпа і безжально бичують. Він терпить ці муки задля нашого спасіння.',
+        fruit: 'Плід тайни: умертвлення плоті',
+      },
+      {
+        ordinal: 'Третя тайна',
+        name: 'Коронування Ісуса тернівним вінцем',
+        reflection: 'Воїни плетуть вінець із колючого терну і кладуть на голову Ісуса, насміхаючись: «Радуйся, Царю Юдейський!»',
+        fruit: 'Плід тайни: моральна відвага',
+      },
+      {
+        ordinal: 'Четверта тайна',
+        name: 'Несення Ісусом Хреста на Голгофу',
+        reflection: 'Ісус несе важкий хрест по вулицях Єрусалима. Він падає, але встає і продовжує шлях на Голгофу.',
+        fruit: 'Плід тайни: терпеливість у стражданнях',
+      },
+      {
+        ordinal: 'П’ята тайна',
+        name: 'Розп’яття і смерть Господа нашого Ісуса Христа',
+        reflection: 'Ісуса розпинають між двома злочинцями. Перед смертю Він доручає Марію Іванові, а потім виголошує: «Доконано!» — і віддає дух.',
+        fruit: 'Плід тайни: спасіння і прощення гріхів',
+      },
+    ],
+  },
+
+  glorious: {
+    label: 'Славні тайни',
+    days: 'Субота, Неділя',
+    mysteries: [
+      {
+        ordinal: 'Перша тайна',
+        name: 'Воскресіння Господа нашого Ісуса Христа',
+        reflection: 'На третій день Ісус воскресає зі смерті. Жони-мироносиці приходять до гробу і знаходять його порожнім. Ангел звіщає: «Він воскрес!»',
+        fruit: 'Плід тайни: віра',
+      },
+      {
+        ordinal: 'Друга тайна',
+        name: 'Вознесіння Господа нашого Ісуса Христа',
+        reflection: 'На сороковий день після Воскресіння Ісус на очах учнів підноситься на небо і сідає праворуч Отця.',
+        fruit: 'Плід тайни: надія на небесне блаженство',
+      },
+      {
+        ordinal: 'Третя тайна',
+        name: 'Зіслання Святого Духа на Апостолів',
+        reflection: 'У день П’ятидесятниці Святий Дух зходить на апостолів і Пресвяту Богородицю у вигляді вогненних язиків. Апостоли сповнюються Духом і виходять проповідувати.',
+        fruit: 'Плід тайни: мудрість і жар апостольства',
+      },
+      {
+        ordinal: 'Четверта тайна',
+        name: 'Успіння Пресвятої Богородиці',
+        reflection: 'Пресвята Богородиця завершує своє земне життя і з душею та тілом входить у небесну славу.',
+        fruit: 'Плід тайни: благочестя',
+      },
+      {
+        ordinal: 'П’ята тайна',
+        name: 'Увінчання Пресвятої Богородиці Цариці Небесної',
+        reflection: 'Пресвята Богородиця увінчується на небесах як Цариця Всесвіту. Вона є нашою заступницею перед Сином.',
+        fruit: 'Плід тайни: довіра до заступництва Марії',
+      },
+    ],
+  },
+
+  luminous: {
+    label: 'Світлі тайни',
+    days: 'Четвер',
+    mysteries: [
+      {
+        ordinal: 'Перша тайна',
+        name: 'Хрещення Господа нашого Ісуса Христа в Йордані',
+        reflection: 'Ісус приймає хрещення від Івана Хрестителя в річці Йордан. Небеса відкриваються, і голос Отця звучить: «Це Мій Син улюблений».',
+        fruit: 'Плід тайни: відкритість до дії Святого Духа',
+      },
+      {
+        ordinal: 'Друга тайна',
+        name: 'Самооб’явлення Ісуса Христа на весіллі в Кані Галілейській',
+        reflection: 'За проханням Богородиці Ісус перетворює воду на вино під час весілля в Кані Галілейській. Це перше публічне чудо.',
+        fruit: 'Плід тайни: до Ісуса через Марію',
+      },
+      {
+        ordinal: 'Третя тайна',
+        name: 'Проголошення Царства Божого і заклик до навернення',
+        reflection: 'Ісус проголошує настання Царства Божого і закликає до покаяння і навернення. Він зцілює хворих і прощає грішників.',
+        fruit: 'Плід тайни: навернення',
+      },
+      {
+        ordinal: 'Четверта тайна',
+        name: 'Преображення Господа нашого Ісуса Христа',
+        reflection: 'На горі Тавор Ісус преображається перед Петром, Яковом та Іваном. Його обличчя засяяло, як сонце, а голос Отця промовив: «Слухайте Його!»',
+        fruit: 'Плід тайни: бажання святості',
+      },
+      {
+        ordinal: 'П’ята тайна',
+        name: 'Встановлення Євхаристії на Тайній Вечері',
+        reflection: 'На Тайній Вечері Ісус встановлює Євхаристію — своє Тіло і Кров — як Новий Завіт і вічну пам’ять Його жертви.',
+        fruit: 'Плід тайни: поклоніння перед Пресвятими Дарами',
+      },
+    ],
+  },
+};
+
+// ─── STEP BUILDER ─────────────────────────────────────────────────
+function buildSteps(key) {
+  const set = SETS[key];
+  const s = [];
+
+  s.push({ type: 'cross',    label: 'Початок', title: 'Знамення Хреста',       subtitle: 'Тричі', prayer: CROSS });
+  s.push({ type: 'tsariu',   label: 'Початок', title: 'Царю небесний',         subtitle: SLAVA_TOBI, prayer: TSARIU });
+  s.push({ type: 'creed',    label: 'Молитва', title: 'Символ Віри',           prayer: CREED });
+  s.push({ type: 'glorybe',  label: 'Молитва', title: 'Слава Отцю',            subtitle: 'Знак хреста. Перше зернятко', prayer: GLORY_FATHER });
+  s.push({ type: 'hailmary', label: 'Молитва', title: 'Богородице Діво',       prayer: HAIL_MARY });
+  s.push({ type: 'glorybe',  label: 'Молитва', title: 'Слава Сину',            subtitle: 'Знак хреста. Друге зернятко', prayer: GLORY_SON });
+  s.push({ type: 'hailmary', label: 'Молитва', title: 'Богородице Діво',       prayer: HAIL_MARY });
+  s.push({ type: 'glorybe',  label: 'Молитва', title: 'Слава Святому Духові',  subtitle: 'Знак хреста. Третє зернятко', prayer: GLORY_SPIRIT });
+  s.push({ type: 'hailmary', label: 'Молитва', title: 'Богородице Діво',       prayer: HAIL_MARY });
+  s.push({ type: 'glorybe',  label: 'Молитва', title: 'Слава Отцю',            prayer: GLORY_BE });
+
+  set.mysteries.forEach((m, i) => {
+    const d = i + 1;
+    const ctx = m.name;
+    const lbl = `Десяток ${d} з 5`;
+
+    s.push({ type: 'mystery',   label: lbl, title: m.ordinal,       subtitle: m.name, reflection: m.reflection, fruit: m.fruit, decade: d });
+    s.push({ type: 'ourfather', label: lbl, title: 'Отче наш',      prayer: OUR_FATHER, decade: d, ctx });
+    for (let j = 1; j <= 10; j++) {
+      s.push({ type: 'hailmary', label: lbl, title: 'Богородице Діво', prayer: HAIL_MARY, decade: d, mary: j, ctx });
+    }
+    s.push({ type: 'glorybe',  label: lbl, title: 'Слава Отцю',     prayer: GLORY_BE, decade: d, ctx });
+    s.push({ type: 'fatima',   label: lbl, title: 'Молитва прощення', prayer: FORGIVENESS, decade: d, ctx });
+  });
+
+  s.push({ type: 'dostoyno', label: 'Завершення', title: 'Достойно є',          prayer: DOSTOYNO });
+  s.push({ type: 'cross',    label: 'Завершення', title: 'Знамення Хреста',     subtitle: 'Тричі', prayer: CROSS });
+  s.push({ type: 'end' });
+
+  return s;
+}
+
+// ─── STATE ────────────────────────────────────────────────────────
+let steps = [];
+let idx   = 0;
+
+// ─── SCREENS ──────────────────────────────────────────────────────
+function show(id) {
+  document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+}
+
+function openRosary() { show('mystery'); }
+
+function start(key) {
+  steps = buildSteps(key);
+  idx   = 0;
+  show('prayer');
+  render();
+}
+
+// ─── NAVIGATION ───────────────────────────────────────────────────
+function go(dir, btn) {
+  const next = idx + dir;
+  if (next < 0 || next >= steps.length) return;
+
+  if (btn) {
+    btn.classList.add('pressed');
+    setTimeout(() => btn.classList.remove('pressed'), 220);
+  }
+
+  const content = document.getElementById('prayer-content');
+  content.classList.add('fading');
+  setTimeout(() => {
+    idx = next;
+    render();
+    content.classList.remove('fading');
+  }, 110);
+}
+
+// ─── HOME MODAL ───────────────────────────────────────────────────
+function askHome()    { document.getElementById('modal-home').classList.add('open'); }
+function closeModal() { document.getElementById('modal-home').classList.remove('open'); }
+function goHome()     { closeModal(); show('menu'); }
+
+// ─── RENDER ───────────────────────────────────────────────────────
+function render() {
+  const step = steps[idx];
+  const content = document.getElementById('prayer-content');
+
+  // counters
+  const chipMary   = document.getElementById('chip-mary');
+  const chipDecade = document.getElementById('chip-decade');
+  const chipStep   = document.getElementById('chip-step');
+
+  chipMary.classList.toggle('hidden', !(step.mary && step.decade));
+  if (step.mary && step.decade) {
+    chipMary.textContent = `Богородице: ${step.mary} / 10`;
+  }
+
+  chipDecade.classList.toggle('hidden', !step.decade);
+  if (step.decade) {
+    chipDecade.textContent = `Десяток: ${step.decade} / 5`;
+  }
+
+  chipStep.textContent = `Крок: ${idx + 1} / ${steps.length}`;
+
+  // top label
+  document.getElementById('topbar-label').textContent = step.label || '';
+
+  // nav visibility
+  const nav = document.getElementById('prayer-nav');
+  nav.style.display = step.type === 'end' ? 'none' : 'flex';
+
+  // nav buttons
+  if (step.type !== 'end') {
+    document.getElementById('btn-prev').disabled = idx === 0;
+    const nextBtn = document.getElementById('btn-next');
+    const isLast = idx === steps.length - 2; // step before 'end'
+    nextBtn.textContent = isLast ? 'Завершити →' : 'Далі →';
+  }
+
+  // content
+  if (step.type === 'end') {
+    content.innerHTML = `
+      <div class="end-wrap">
+        <div class="end-cross">✝</div>
+        <div class="end-title">Амінь</div>
+        <div class="end-sub">Вінець Пресвятої Богородиці завершено</div>
+        <button class="end-btn" onclick="show('menu')">На головну</button>
+      </div>`;
+
+  } else if (step.type === 'mystery') {
+    content.innerHTML = `
+      <div class="content-label">${esc(step.label)}</div>
+      <div class="content-title">${esc(step.title)}</div>
+      <div class="content-subtitle">${esc(step.subtitle)}</div>
+      <hr class="divider">
+      <div class="mystery-reflection">${esc(step.reflection)}</div>
+      <div class="mystery-fruit">${esc(step.fruit)}</div>`;
+
+  } else {
+    const hasCtx    = !!step.ctx;
+    const hasSub    = !!step.subtitle;
+    const ctxHtml   = hasCtx ? `<div class="mystery-ctx">Тайна: ${esc(step.ctx)}</div>` : '';
+    const subHtml   = hasSub ? `<div class="content-subtitle">${esc(step.subtitle)}</div>` : '';
+    const labelHtml = step.label ? `<div class="content-label">${esc(step.label)}</div>` : '';
+
+    content.innerHTML = `
+      ${labelHtml}
+      <div class="content-title">${esc(step.title)}</div>
+      ${subHtml}
+      ${ctxHtml}
+      <hr class="divider">
+      <div class="prayer-text">${esc(step.prayer)}</div>`;
+  }
+
+  content.scrollTop = 0;
+}
+
+function esc(str) {
+  if (!str) return '';
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+// ─── KEYBOARD ─────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if (document.getElementById('screen-prayer').classList.contains('active')) {
+    if (e.key === 'ArrowRight') go(1);
+    if (e.key === 'ArrowLeft')  go(-1);
+  }
+});
+</script>
+</body>
+</html>
