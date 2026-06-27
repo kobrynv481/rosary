@@ -352,6 +352,7 @@
     /* ── NAV ─────────────────────────────────────────────────────── */
     .prayer-nav {
       padding: 14px 16px;
+      padding-bottom: max(14px, env(safe-area-inset-bottom));
       border-top: 1px solid var(--border);
       background: var(--surface);
       display: flex;
@@ -462,15 +463,14 @@
   <div class="rosary-list">
 
     <button class="rosary-card" onclick="openRosary()">
-      <div class="rosary-card-name">Вінець Пресвятої Богородиці</div>
+      <div class="rosary-card-name">Вервиця Пресвятої Богородиці</div>
       <div class="rosary-card-sub">Чотири набори тайн з роздумами</div>
     </button>
 
-    <div class="rosary-card disabled">
-      <div class="rosary-card-name">Вінець Божого Милосердя</div>
-      <div class="rosary-card-sub">П'ять десятків з тайнами</div>
-      <div class="badge">Незабаром</div>
-    </div>
+    <button class="rosary-card" onclick="openMercyRosary()">
+      <div class="rosary-card-name">Вервиця Божого Милосердя</div>
+      <div class="rosary-card-sub">Три варіанти</div>
+    </button>
 
   </div>
 </div>
@@ -479,7 +479,7 @@
 <div id="screen-mystery" class="screen">
   <div class="sub-header">
     <button class="icon-btn" onclick="show('menu')" aria-label="Назад">←</button>
-    <div class="sub-header-title">Вінець Пресвятої Богородиці</div>
+    <div class="sub-header-title">Вервиця Пресвятої Богородиці</div>
   </div>
   <div class="mystery-list">
 
@@ -501,6 +501,32 @@
     <div class="mystery-card" onclick="start('luminous')">
       <div class="mystery-card-title">Світлі тайни</div>
       <div class="mystery-card-days">Четвер</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══ MERCY SELECT ══════════════════════════════════════════════ -->
+<div id="screen-mercy" class="screen">
+  <div class="sub-header">
+    <button class="icon-btn" onclick="show('menu')" aria-label="Назад">←</button>
+    <div class="sub-header-title">Вервиця Божого Милосердя</div>
+  </div>
+  <div class="mystery-list">
+
+    <div class="mystery-card" onclick="startMercy(1)">
+      <div class="mystery-card-title">Варіант І</div>
+      <div class="mystery-card-days">Отче Предвічний</div>
+    </div>
+
+    <div class="mystery-card" onclick="startMercy(2)">
+      <div class="mystery-card-title">Варіант ІІ</div>
+      <div class="mystery-card-days">Матінко багатостраждальна</div>
+    </div>
+
+    <div class="mystery-card" onclick="startMercy(3)">
+      <div class="mystery-card-title">Варіант ІІІ</div>
+      <div class="mystery-card-days">Ісусе Милосердя</div>
     </div>
 
   </div>
@@ -603,6 +629,46 @@ const FORGIVENESS =
   'О, наш любий Ісусе, прости нам наші гріхи, ' +
   'захорони нас від пекельного вогню, заведи до неба усі душі, ' +
   'особливо ті, що найбільше потребують Твого Милосердя.';
+
+// ─── MERCY PRAYERS ────────────────────────────────────────────────
+const ETERNAL_FATHER =
+  'Отче Предвічний, жертвую Тобі Тіло і Кров, Душу і Божество ' +
+  'найдорожчого Сина Твого, а нашого Господа Ісуса Христа ' +
+  'для перепрошення за наші гріхи і гріхи цілого світу.';
+
+const FOR_SAKE =
+  'Задля болючих Його терпінь, май Милосердя над нами і над цілим світом.';
+
+const HOLY_GOD =
+  'Святий Боже, Святий Кріпкий, Святий Безсмертний, ' +
+  'помилуй нас і цілий світ. Амінь.';
+
+const BLOOD_WATER =
+  'О крове і Водо, що виплила з Найсвятішого Серця Ісусового ' +
+  'як цілюще джерело Милосердя для нас, на Тебе я уповаю ' +
+  'і в Тобі всю свою надію покладаю! Ісусе, на Тебе всю надію свою покладаю!';
+
+const SACRED_HEART_1 = 'О, Найсвятіше Серце Ісуса, в Тобі покладаю всю свою надію.';
+const SACRED_HEART_2 = 'О, Найсвятіше Серце Ісуса, на Тебе уповаю.';
+const SACRED_HEART_3 = 'О, Найсвятіше Серце Ісуса, вірю в Твою любов до мене.';
+
+const MATINKA =
+  'Матінко багатостраждальна, Ти стояла під Хрестом, не переставай молитися за нас. ' +
+  'О Ісусе! Ти казав, що хто про що в Тебе буде просити, з довір\'ям буде вислуханий.';
+
+const MERCIFUL_JESUS = 'О, Ісусе милосердний, змилуйся над нами.';
+
+const PID_TVOYU =
+  'Під Твою охорону прибігаємо, Свята Богородице, ' +
+  'молитов наших не відкидай у скорботах наших, ' +
+  'але від небезпек визволи нас, єдина Чиста, єдина Благословенна.';
+
+const MERCY_LARGE_3 =
+  'О, мій Ісусе Милосердя, в котрого немає нічого неможливого. ' +
+  'Тож змилосердися над нами, негідними дітьми Твоїми, ' +
+  'і дай нам ту ласку, про яку так покірно просимо.';
+
+const MERCY_SMALL_3 = 'О мій Ісусе Милосердя, змилосердися над нами.';
 
 const DOSTOYNO =
   'Достойно є воістину величати блаженною Тебе, Богородицю, ' +
@@ -798,6 +864,77 @@ function buildSteps(key) {
   return s;
 }
 
+function buildMercySteps(variant) {
+  const s = [];
+
+  if (variant === 1) {
+    s.push({ type: 'cross',     label: 'Початок', title: 'Знамення Хреста',  subtitle: 'Тричі', prayer: CROSS });
+    s.push({ type: 'ourfather', label: 'Початок', title: 'Отче наш',         prayer: OUR_FATHER });
+    s.push({ type: 'hailmary',  label: 'Початок', title: 'Богородице Діво',  prayer: HAIL_MARY });
+    s.push({ type: 'creed',     label: 'Початок', title: 'Символ Віри',      prayer: CREED });
+    s.push({ type: 'glorybe',   label: 'Початок', title: 'Слава Отцю',       prayer: GLORY_BE });
+
+    for (let d = 1; d <= 5; d++) {
+      const lbl = `Десяток ${d} з 5`;
+      s.push({ type: 'eternal', label: lbl, title: 'Отче Предвічний', subtitle: 'Велике зернятко', prayer: ETERNAL_FATHER, decade: d });
+      for (let j = 1; j <= 10; j++) {
+        s.push({ type: 'forsake', label: lbl, title: 'Задля болючих терпінь', prayer: FOR_SAKE, decade: d, mary: j, maryLabel: 'Молитва' });
+      }
+    }
+
+    s.push({ type: 'holygod',    label: 'Завершення', title: 'Святий Боже',      subtitle: 'Тричі', prayer: HOLY_GOD });
+    s.push({ type: 'bloodwater', label: 'Завершення', title: 'Заключна молитва', prayer: BLOOD_WATER });
+    s.push({ type: 'cross',      label: 'Завершення', title: 'Знамення Хреста',  subtitle: 'Тричі', prayer: CROSS });
+    s.push({ type: 'end', rosaryName: 'Вервиця Божого Милосердя — Варіант І' });
+
+  } else if (variant === 2) {
+    s.push({ type: 'cross',  label: 'Початок', title: 'Знамення Хреста',   subtitle: 'Тричі', prayer: CROSS });
+    s.push({ type: 'tsariu', label: 'Початок', title: 'Царю небесний',     subtitle: SLAVA_TOBI, prayer: TSARIU });
+    s.push({ type: 'sh1',    label: 'Початок', title: 'Найсвятіше Серце Ісуса', subtitle: 'Друге зернятко',  prayer: SACRED_HEART_1 });
+    s.push({ type: 'sh2',    label: 'Початок', title: 'Найсвятіше Серце Ісуса', subtitle: 'Третє зернятко',  prayer: SACRED_HEART_2 });
+    s.push({ type: 'sh3',    label: 'Початок', title: 'Найсвятіше Серце Ісуса', subtitle: 'Четверте зернятко', prayer: SACRED_HEART_3 });
+
+    for (let d = 1; d <= 5; d++) {
+      const lbl = `Десяток ${d} з 5`;
+      s.push({ type: 'matinka',  label: lbl, title: 'Матінко багатостраждальна', subtitle: 'Велике зернятко', prayer: MATINKA, decade: d });
+      for (let j = 1; j <= 10; j++) {
+        s.push({ type: 'merciful', label: lbl, title: 'Ісусе милосердний', prayer: MERCIFUL_JESUS, decade: d, mary: j, maryLabel: 'Молитва' });
+      }
+    }
+
+    s.push({ type: 'ourfather', label: 'Завершення', title: 'Отче наш',         prayer: OUR_FATHER });
+    s.push({ type: 'hailmary',  label: 'Завершення', title: 'Богородице Діво',  subtitle: '1 з 3', prayer: HAIL_MARY });
+    s.push({ type: 'hailmary',  label: 'Завершення', title: 'Богородице Діво',  subtitle: '2 з 3', prayer: HAIL_MARY });
+    s.push({ type: 'hailmary',  label: 'Завершення', title: 'Богородице Діво',  subtitle: '3 з 3', prayer: HAIL_MARY });
+    s.push({ type: 'pidtvoyu',  label: 'Завершення', title: 'Під Твою охорону', prayer: PID_TVOYU });
+    s.push({ type: 'end', rosaryName: 'Вервиця Божого Милосердя — Варіант ІІ' });
+
+  } else if (variant === 3) {
+    s.push({ type: 'cross',   label: 'Початок', title: 'Знамення Хреста',       subtitle: 'Тричі', prayer: CROSS });
+    s.push({ type: 'slava',   label: 'Початок', title: 'Слава Тобі',            prayer: SLAVA_TOBI });
+    s.push({ type: 'tsariu',  label: 'Початок', title: 'Царю небесний',         prayer: TSARIU });
+    s.push({ type: 'creed',   label: 'Початок', title: 'Символ Віри',           prayer: CREED });
+    s.push({ type: 'glorybe', label: 'Початок', title: 'Слава Отцю',            subtitle: 'Знак хреста. Перше зернятко',  prayer: GLORY_FATHER });
+    s.push({ type: 'glorybe', label: 'Початок', title: 'Слава Сину',            subtitle: 'Знак хреста. Друге зернятко',  prayer: GLORY_SON });
+    s.push({ type: 'glorybe', label: 'Початок', title: 'Слава Святому Духові',  subtitle: 'Знак хреста. Третє зернятко',  prayer: GLORY_SPIRIT });
+
+    for (let d = 1; d <= 5; d++) {
+      const lbl = `Десяток ${d} з 5`;
+      s.push({ type: 'mercy3l', label: lbl, title: 'Ісусе Милосердя', subtitle: 'Велике зернятко', prayer: MERCY_LARGE_3, decade: d });
+      for (let j = 1; j <= 10; j++) {
+        s.push({ type: 'mercy3s', label: lbl, title: 'Ісусе Милосердя', prayer: MERCY_SMALL_3, decade: d, mary: j, maryLabel: 'Молитва' });
+      }
+    }
+
+    s.push({ type: 'glorybe', label: 'Завершення', title: 'Слава Отцю', subtitle: '1 з 3', prayer: GLORY_BE });
+    s.push({ type: 'glorybe', label: 'Завершення', title: 'Слава Отцю', subtitle: '2 з 3', prayer: GLORY_BE });
+    s.push({ type: 'glorybe', label: 'Завершення', title: 'Слава Отцю', subtitle: '3 з 3', prayer: GLORY_BE });
+    s.push({ type: 'end', rosaryName: 'Вервиця Божого Милосердя — Варіант ІІІ' });
+  }
+
+  return s;
+}
+
 // ─── STATE ────────────────────────────────────────────────────────
 let steps = [];
 let idx   = 0;
@@ -808,7 +945,15 @@ function show(id) {
   document.getElementById('screen-' + id).classList.add('active');
 }
 
-function openRosary() { show('mystery'); }
+function openRosary()       { show('mystery'); }
+function openMercyRosary()  { show('mercy'); }
+
+function startMercy(variant) {
+  steps = buildMercySteps(variant);
+  idx   = 0;
+  show('prayer');
+  render();
+}
 
 function start(key) {
   steps = buildSteps(key);
@@ -853,7 +998,7 @@ function render() {
 
   chipMary.classList.toggle('hidden', !(step.mary && step.decade));
   if (step.mary && step.decade) {
-    chipMary.textContent = `Богородице: ${step.mary} / 10`;
+    chipMary.textContent = `${step.maryLabel || 'Богородице'}: ${step.mary} / 10`;
   }
 
   chipDecade.classList.toggle('hidden', !step.decade);
@@ -884,7 +1029,7 @@ function render() {
       <div class="end-wrap">
         <div class="end-cross">✝</div>
         <div class="end-title">Амінь</div>
-        <div class="end-sub">Вінець Пресвятої Богородиці завершено</div>
+        <div class="end-sub">${esc(step.rosaryName || 'Вервиця Пресвятої Богородиці')} завершено</div>
         <button class="end-btn" onclick="show('menu')">На головну</button>
       </div>`;
 
