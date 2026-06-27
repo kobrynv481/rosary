@@ -472,6 +472,11 @@
       <div class="rosary-card-sub">Три варіанти</div>
     </button>
 
+    <button class="rosary-card" onclick="startHealing()">
+      <div class="rosary-card-name">Вервиця за Зцілення</div>
+      <div class="rosary-card-sub">Душевне і тілесне</div>
+    </button>
+
   </div>
 </div>
 
@@ -669,6 +674,16 @@ const MERCY_LARGE_3 =
   'і дай нам ту ласку, про яку так покірно просимо.';
 
 const MERCY_SMALL_3 = 'О мій Ісусе Милосердя, змилосердися над нами.';
+
+// ─── HEALING PRAYERS ──────────────────────────────────────────────
+const HEALING_LARGE =
+  'Ісусе Милосердний, Твоїми ранами ми зцілені. Вилікуй наші душі і тіла.';
+
+const HEALING_SMALL =
+  'Господи Ісусе, Сину Божий, помилуй і зціли нас.';
+
+const HOLY_GOD_HEALING =
+  'Святий Боже, Святий Кріпкий, Святий Безсмертний, помилуй нас і зціли наш біль.';
 
 const DOSTOYNO =
   'Достойно є воістину величати блаженною Тебе, Богородицю, ' +
@@ -935,6 +950,32 @@ function buildMercySteps(variant) {
   return s;
 }
 
+function buildHealingSteps() {
+  const s = [];
+
+  s.push({ type: 'cross',     label: 'Початок', title: 'Знамення Хреста',  subtitle: 'Тричі', prayer: CROSS });
+  s.push({ type: 'tsariu',    label: 'Початок', title: 'Царю небесний',    subtitle: SLAVA_TOBI, prayer: TSARIU });
+  s.push({ type: 'ourfather', label: 'Початок', title: 'Отче наш',         prayer: OUR_FATHER });
+  s.push({ type: 'hailmary',  label: 'Початок', title: 'Богородице Діво',  prayer: HAIL_MARY });
+  s.push({ type: 'creed',     label: 'Початок', title: 'Символ Віри',      prayer: CREED });
+
+  for (let d = 1; d <= 5; d++) {
+    const lbl = `Десяток ${d} з 5`;
+    s.push({ type: 'healingl', label: lbl, title: 'Ісусе Милосердний', subtitle: 'Велике зернятко', prayer: HEALING_LARGE, decade: d });
+    for (let j = 1; j <= 10; j++) {
+      s.push({ type: 'healings', label: lbl, title: 'Господи Ісусе', prayer: HEALING_SMALL, decade: d, mary: j, maryLabel: 'Молитва' });
+    }
+  }
+
+  s.push({ type: 'holygodh', label: 'Завершення', title: 'Святий Боже', subtitle: '1 з 3', prayer: HOLY_GOD_HEALING });
+  s.push({ type: 'holygodh', label: 'Завершення', title: 'Святий Боже', subtitle: '2 з 3', prayer: HOLY_GOD_HEALING });
+  s.push({ type: 'holygodh', label: 'Завершення', title: 'Святий Боже', subtitle: '3 з 3', prayer: HOLY_GOD_HEALING });
+  s.push({ type: 'cross',    label: 'Завершення', title: 'Знамення Хреста', subtitle: 'Тричі', prayer: CROSS });
+  s.push({ type: 'end', rosaryName: 'Вервиця за Зцілення' });
+
+  return s;
+}
+
 // ─── STATE ────────────────────────────────────────────────────────
 let steps = [];
 let idx   = 0;
@@ -950,6 +991,13 @@ function openMercyRosary()  { show('mercy'); }
 
 function startMercy(variant) {
   steps = buildMercySteps(variant);
+  idx   = 0;
+  show('prayer');
+  render();
+}
+
+function startHealing() {
+  steps = buildHealingSteps();
   idx   = 0;
   show('prayer');
   render();
